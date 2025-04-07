@@ -69,16 +69,14 @@ async def show_model_details(update: Update, context: ContextTypes.DEFAULT_TYPE)
     model_id = query.data.split('_')[1]
     model = next(m for m in models_data['models'] if m['id'] == model_id)
     
-    response = f"""
-<b>{model['name']}</b> - {model['price']}
-
-{model['description']}
-
-<b>Features:</b>
-{'\n'.join(['✓ ' + feature for feature in model['features']])}
-
-<i>Would you like to know more about this model?</i>
-    """
+    features_list = '\n'.join(['✓ ' + feature for feature in model['features']])
+    response = (
+        f"<b>{model['name']}</b> - {model['price']}\n\n"
+        f"{model['description']}\n\n"
+        f"<b>Features:</b>\n"
+        f"{features_list}\n\n"
+        f"<i>Would you like to know more about this model?</i>"
+    )
     
     keyboard = [
         [InlineKeyboardButton("🔙 Back to Models", callback_data='models')],
@@ -120,7 +118,12 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     """Start the bot"""
-    app = Application.builder().token(os.getenv('7337288205:AAFQvsdE-SDbJh6NkJ-uGBy1UOwu4F0a198')).build()
+    token = os.getenv('TELEGRAM_TOKEN')
+    if not token:
+        logging.error("TELEGRAM_TOKEN environment variable not set!")
+        return
+    
+    app = Application.builder().token(token).build()
     
     # Add handlers
     app.add_handler(CommandHandler('start', start))
