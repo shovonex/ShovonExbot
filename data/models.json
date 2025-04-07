@@ -1,22 +1,36 @@
 {
   "models": [
     {
-      "name": "Basic Package",
+      "id": "model1",
+      "name": "Elegance Pro",
       "price": "$49/month",
-      "description": "Perfect for getting started with all essential features",
-      "image": "https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg"
+      "description": "Premium model with advanced conversational AI and 24/7 support.",
+      "features": ["24/7 Support", "Advanced AI", "Customizable"],
+      "image": "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg"
     },
     {
-      "name": "Premium Package",
+      "id": "model2",
+      "name": "Standard Edition",
+      "price": "$29/month",
+      "description": "Balanced features for everyday business needs.",
+      "features": ["Business Hours Support", "Standard AI", "Pre-set options"],
+      "image": "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg"
+    },
+    {
+      "id": "model3",
+      "name": "Basic Plan",
+      "price": "$9/month",
+      "description": "Essential features for getting started.",
+      "features": ["Email Support", "Basic AI", "Fixed options"],
+      "image": "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg"
+    },
+    {
+      "id": "model4",
+      "name": "Enterprise Solution",
       "price": "$99/month",
-      "description": "Advanced features for growing businesses",
+      "description": "Custom solutions for large businesses.",
+      "features": ["Dedicated Manager", "Enterprise AI", "Fully Customizable"],
       "image": "https://images.pexels.com/photos/1181396/pexels-photo-1181396.jpeg"
-    },
-    {
-      "name": "Enterprise Package",
-      "price": "$199/month",
-      "description": "Custom solutions for large scale operations",
-      "image": "https://images.pexels.com/photos/1181400/pexels-photo-1181400.jpeg"
     }
   ]
 }
