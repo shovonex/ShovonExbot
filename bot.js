@@ -120,7 +120,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     """Start the bot"""
-    app = Application.builder().token(os.getenv('TELEGRAM_TOKEN')).build()
+    app = Application.builder().token(os.getenv('7337288205:AAFQvsdE-SDbJh6NkJ-uGBy1UOwu4F0a198')).build()
     
     # Add handlers
     app.add_handler(CommandHandler('start', start))
