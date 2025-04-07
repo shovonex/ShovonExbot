@@ -1,92 +1,137 @@
-const { Telegraf, Markup } = require('telegraf');
-const models = require('./data/models.json');
+import json
+import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
+import os
 
-// Female persona responses
-const FEMALE_RESPONSES = {
-  greeting: "👋 Hello darling! I'm Clara, your virtual assistant. How can I help you today?",
-  unknown: "💁‍♀️ I'm not sure I understand, sweetie. Could you rephrase that?",
-  goodbye: "💋 It was lovely chatting with you! Come back anytime!",
-  joke: "Why don't scientists trust atoms? Because they make up everything! 😄",
-  pricing: "Here are our beautiful options, sweetheart:"
-};
+# Initialize logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-// Initialize bot
-const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
+# Load models data
+with open('models.json', 'r') as f:
+    models_data = json.load(f)
 
-// Welcome command
-bot.start((ctx) => {
-  return ctx.replyWithMarkdown(FEMALE_RESPONSES.greeting, 
-    Markup.keyboard([
-      ['💎 View Models & Pricing', '💬 Chat with me'],
-      ['❓ Help', '👋 Goodbye']
-    ]).resize()
-  );
-});
+# Initialize chatbot
+chatbot = ChatBot('FemaleBot')
+trainer = ChatterBotCorpusTrainer(chatbot)
+trainer.train("chatterbot.corpus.english")
 
-// Pricing command
-bot.hears('💎 View Models & Pricing', (ctx) => {
-  let message = `${FEMALE_RESPONSES.pricing}\n\n`;
-  
-  models.models.forEach(model => {
-    message += `*${model.name}* - ${model.price}\n${model.description}\n\n`;
-  });
+# Menu keyboards
+def get_main_menu_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("📋 View All Models", callback_data='models')],
+        [InlineKeyboardButton("💰 Pricing Comparison", callback_data='pricing')],
+        [InlineKeyboardButton("💬 Chat with me", callback_data='chat')]
+    ]
+    return InlineKeyboardMarkup(keyboard)
 
-  ctx.replyWithMarkdown(message, 
-    Markup.inlineKeyboard(
-      models.models.map(model => [
-        Markup.button.callback(model.name, `select_${model.name.replace(/\s+/g, '_')}`)
-      ])
+def get_models_keyboard():
+    keyboard = []
+    for model in models_data['models']:
+        keyboard.append([InlineKeyboardButton(
+            f"{model['name']} - {model['price']}", 
+            callback_data=f"model_{model['id']}"
+        )])
+    keyboard.append([InlineKeyboardButton("🔙 Back to Menu", callback_data='menu')])
+    return InlineKeyboardMarkup(keyboard)
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send welcome message with menu"""
+    user = update.effective_user
+    welcome_text = f"""
+👋 Hello {user.first_name}! I'm Clara, your virtual assistant.
+Here's what I can help you with:
+
+• Browse our different models
+• Compare pricing plans
+• Chat with me naturally
+
+How can I assist you today?
+    """
+    await update.message.reply_text(welcome_text, reply_markup=get_main_menu_keyboard())
+
+async def show_models(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show model selection menu"""
+    query = update.callback_query
+    await query.answer()
+    
+    response = "🌟 Please select a model to view details:\n"
+    await query.edit_message_text(response, reply_markup=get_models_keyboard(), parse_mode='HTML')
+
+async def show_model_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show detailed information about a specific model"""
+    query = update.callback_query
+    await query.answer()
+    
+    model_id = query.data.split('_')[1]
+    model = next(m for m in models_data['models'] if m['id'] == model_id)
+    
+    response = f"""
+<b>{model['name']}</b> - {model['price']}
+
+{model['description']}
+
+<b>Features:</b>
+{'\n'.join(['✓ ' + feature for feature in model['features']])}
+
+<i>Would you like to know more about this model?</i>
+    """
+    
+    keyboard = [
+        [InlineKeyboardButton("🔙 Back to Models", callback_data='models')],
+        [InlineKeyboardButton("💬 Chat About This", callback_data=f'chat_{model_id}')]
+    ]
+    
+    await query.edit_message_text(
+        response, 
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='HTML'
     )
-  );
-});
 
-// Handle model selection
-models.models.forEach(model => {
-  const action = `select_${model.name.replace(/\s+/g, '_')}`;
-  bot.action(action, (ctx) => {
-    ctx.answerCbQuery();
-    ctx.replyWithPhoto(
-      { url: model.image },
-      { caption: `💖 *${model.name}* 💖\n\n💰 Price: ${model.price}\n📝 ${model.description}\n\nShall I help you purchase this package, darling?`,
-        parse_mode: 'Markdown',
-        ...Markup.inlineKeyboard([
-          Markup.button.callback('Yes please!', 'confirm_purchase'),
-          Markup.button.callback('Show other options', 'show_options')
-        ])
-      }
-    );
-  });
-});
+async def show_pricing(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show pricing information"""
+    query = update.callback_query
+    await query.answer()
+    
+    response = "💰 Our Pricing Plans:\n\n"
+    for model in models_data['models']:
+        response += f"<b>{model['name']}</b>: {model['price']}\n"
+    
+    response += "\n💡 All plans come with 24/7 support!"
+    await query.edit_message_text(response, parse_mode='HTML')
 
-// Purchase confirmation
-bot.action('confirm_purchase', (ctx) => {
-  ctx.answerCbQuery();
-  ctx.reply('Wonderful choice! Please send /contact to connect with our team for payment 💳');
-});
+async def handle_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle natural language conversation"""
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        await query.edit_message_text("💬 You're now in chat mode. Type /menu to return.")
+    else:
+        user_input = update.message.text
+        response = chatbot.get_response(user_input)
+        await update.message.reply_text(str(response))
 
-// Show options again
-bot.action('show_options', (ctx) => {
-  ctx.answerCbQuery();
-  ctx.reply('Of course! Let me show you our options again...');
-  ctx.reply(FEMALE_RESPONSES.pricing, 
-    Markup.inlineKeyboard(
-      models.models.map(model => [
-        Markup.button.callback(model.name, `select_${model.name.replace(/\s+/g, '_')}`)
-      ])
-    )
-  );
-});
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to main menu"""
+    await update.message.reply_text("Main Menu:", reply_markup=get_menu_keyboard())
 
-// Fallback for unknown messages
-bot.on('text', (ctx) => {
-  if (!['start', 'help', 'goodbye'].includes(ctx.message.text.toLowerCase())) {
-    return ctx.reply(FEMALE_RESPONSES.unknown);
-  }
-});
+def main():
+    """Start the bot"""
+    app = Application.builder().token(os.getenv('TELEGRAM_TOKEN')).build()
+    
+    # Add handlers
+    app.add_handler(CommandHandler('start', start))
+    app.add_handler(CommandHandler('menu', menu))
+    app.add_handler(CallbackQueryHandler(show_models, pattern='^models$'))
+    app.add_handler(CallbackQueryHandler(show_pricing, pattern='^pricing$'))
+    app.add_handler(CallbackQueryHandler(show_model_details, pattern='^model_'))
+    app.add_handler(CallbackQueryHandler(handle_chat, pattern='^chat'))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_chat))
+    
+    app.run_polling()
 
-// Goodbye command
-bot.hears('👋 Goodbye', (ctx) => {
-  return ctx.reply(FEMALE_RESPONSES.goodbye);
-});
-
-module.exports = bot;
+if __name__ == '__main__':
+    main()
