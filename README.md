@@ -3,10 +3,10 @@
 A human-like conversational bot with model and pricing information.
 
 ## Features
-- Natural language conversation using ChatterBot
+- Natural language conversation
 - Interactive menu with InlineKeyboard
 - Model and pricing display from JSON data
-- Webhook support for Render deployment
+- Automatic webhook configuration
 - Error handling and logging
 
 ## Setup Instructions
@@ -18,7 +18,7 @@ A human-like conversational bot with model and pricing information.
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file:
+4. Create a `.env` file with:
 ```bash
 TELEGRAM_TOKEN=your_bot_token_here
 ```
@@ -30,35 +30,35 @@ TELEGRAM_TOKEN=your_bot_token_here
 3. Connect your GitHub repository
 4. Set environment variables:
    - `TELEGRAM_TOKEN`: Your bot token
-   - `PORT`: 8000 (or your preferred port)
-5. Set the build command:
-```bash
-pip install -r requirements.txt
-```
-6. Set the start command:
-```bash
-python app.py
-```
+5. Configure these settings:
+   - Runtime: Python 3
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `python app.py`
+   - Port: 8000
 
-## Webhook Setup
-
-After deployment:
-1. Set your webhook URL:
+## Webhook Configuration
+The bot automatically sets up the webhook to:
 ```bash
-https://api.telegram.org/bot{TOKEN}/setWebhook?url={YOUR_RENDER_URL}/webhook
+https://russ-bot.onrender.com/webhook
 ```
 
-## Local Testing
-
-For development, you can use polling mode:
+## Local Development
+For testing with polling:
 ```bash
 python bot.py
 ```
 
-For production, use the webhook server:
+For webhook testing:
 ```bash
 python app.py
 ```
+
+## Troubleshooting
+If you encounter issues:
+- Verify port 8000 is set in Render
+- Check TELEGRAM_TOKEN is correct
+- Review logs for errors
+- Test locally first
 
 ## Bot Commands
 - `/start` - Begin interaction
