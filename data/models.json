@@ -1,0 +1,22 @@
+{
+  "models": [
+    {
+      "name": "Basic Package",
+      "price": "$49/month",
+      "description": "Perfect for getting started with all essential features",
+      "image": "https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg"
+    },
+    {
+      "name": "Premium Package",
+      "price": "$99/month",
+      "description": "Advanced features for growing businesses",
+      "image": "https://images.pexels.com/photos/1181396/pexels-photo-1181396.jpeg"
+    },
+    {
+      "name": "Enterprise Package",
+      "price": "$199/month",
+      "description": "Custom solutions for large scale operations",
+      "image": "https://images.pexels.com/photos/1181400/pexels-photo-1181400.jpeg"
+    }
+  ]
+}
