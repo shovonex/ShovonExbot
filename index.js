@@ -10,7 +10,7 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'production') {
   const webhookUrl = `${process.env.WEBHOOK_URL}/bot${process.env.TELEGRAM_TOKEN}`;
   app.use(bot.webhookCallback(`/bot${process.env.TELEGRAM_TOKEN}`));
-  bot.telegram.setWebhook(webhookUrl)
+  bot.telegram.setWebhook(https://russ-bot.onrender.com)
     .then(() => console.log('Webhook set successfully'))
     .catch(err => console.error('Error setting webhook:', err));
 } else {
