@@ -1,0 +1,4 @@
+python-telegram-bot==20.3
+flask==2.3.2
+chatterbot==1.1.0a7
+python-dotenv==1.0.0
