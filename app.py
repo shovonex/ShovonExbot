@@ -1,5 +1,5 @@
 from flask import Flask, request
-from bot import main
+from telegram-bot.bot import main
 import os
 
 app = Flask(__name__)
